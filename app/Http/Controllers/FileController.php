@@ -142,12 +142,10 @@ class FileController extends Controller
                 'file' => 'required|file|mimetypes:text/plain|max:1000000'
             ]);
 
-            $file = $request->file('file'); //ata blade ar input field ar name
+            $file = $request->file('file');
             $path = $file->getPathname();
 
-//        $log_file = fopen($path, 'r');
-//        $output="";
-//        dd($log_file);
+
             if (file_exists($path)) {
                 $log_file = fopen($path, "r");
 
@@ -158,7 +156,7 @@ class FileController extends Controller
                 while (!feof($log_file)) {
                     $line = fgets($log_file);
 
-//            dd($line);
+
 
                     if (preg_match('/^(\S+) (\S+) (\S+) \[(.+)\] "(\S+) (\S+) (\S+)" (\S+) (\S+) "(.*?)" "(.*?)" "(.*?)"/', $line, $matches)) {
 
@@ -176,6 +174,10 @@ class FileController extends Controller
                             'user_agent' => $matches[11],
                             'cookies_value' => $matches[12],
                         ];
+
+//                        $user_agent_words = explode(' ', $data['user_agent']);
+//                        $data['user_agent_first_word'] = $user_agent_words[0];
+
                         $lineChunks[] = $data;
                         $lineNumber++;
 
@@ -183,9 +185,6 @@ class FileController extends Controller
                         DB::table('logfiles')->insert($lineChunks);
                             $lineChunks = [];
                         }
-//                    return "data save in database table successfully";
-//                dd($matches[2]);
-//
 
                     }
                 }
@@ -266,20 +265,11 @@ public function upload2(Request $request){
             $u=Logfile::query();
 
             return DataTables::of($u)
-//                ->addColumn('action', function($admin) {
-//                    return'<a href="'.route('users.edit', $admin->id).'" class="btn btn-primary">Edit</a>';
-//                })
-//                ->rawColumns(["action"])
-
-                ->editColumn('status', function ($row) {
-//                    return $row->status ? 'active' : 'inactive';
-                    if($row->status==1){
-                        return 'active';
-                    }else{
-                        return 'inactive';
-                    }
-
+                ->addColumn('action', function($admin) {
+                     return '<a class="btn btn-danger">Delete</a>';
                 })
+                ->rawColumns(["action"])
+
                 ->make(true);
 
         }
